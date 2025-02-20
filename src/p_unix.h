@@ -2,8 +2,9 @@
 
    This file is part of the UPX executable compressor.
 
-   Copyright (C) 1996-2020 Markus Franz Xaver Johannes Oberhumer
-   Copyright (C) 1996-2020 Laszlo Molnar
+   Copyright (C) 1996-2025 Markus Franz Xaver Johannes Oberhumer
+   Copyright (C) 1996-2025 Laszlo Molnar
+   Copyright (C) 2000-2025 John F. Reiser
    All Rights Reserved.
 
    UPX and the UCL library are free software; you can redistribute them
@@ -23,9 +24,13 @@
 
    Markus F.X.J. Oberhumer              Laszlo Molnar
    <markus@oberhumer.com>               <ezerotven+github@gmail.com>
+
+   John F. Reiser
+   <jreiser@users.sourceforge.net>
  */
 
 
+#pragma once
 #ifndef __UPX_P_UNIX_H
 #define __UPX_P_UNIX_H 1
 
@@ -37,19 +42,22 @@
 
 class PackUnix : public Packer
 {
+public:
+    ~PackUnix();
     typedef Packer super;
 protected:
     PackUnix(InputFile *f);
 public:
-    virtual int getVersion() const { return 13; }
-    virtual const int *getFilters() const { return NULL; }
+    virtual int getVersion() const override { return 13; }
+    virtual const int *getFilters() const override { return nullptr; }
     virtual int getStrategy(Filter &);
 
-    virtual void pack(OutputFile *fo);
-    virtual void unpack(OutputFile *fo);
+    virtual void pack(OutputFile *fo) override;
+    virtual void unpack(OutputFile *fo) override;
 
-    virtual bool canPack();
-    virtual int canUnpack();
+    virtual tribool canPack() override;
+    virtual tribool canUnpack() override; // bool, except -1: format known, but not packed
+    int find_overlay_offset(MemBuffer const &buf);
 
 protected:
     // called by the generic pack()
@@ -64,22 +72,25 @@ protected:
 
     virtual void writePackHeader(OutputFile *fo);
 
-    virtual bool checkCompressionRatio(unsigned, unsigned) const;
+    virtual bool checkCompressionRatio(unsigned, unsigned) const override;
 
 protected:
     struct Extent {
-        off_t offset;
-        off_t size;
+        upx_off_t offset;
+        upx_off_t size;
     };
     virtual void packExtent(const Extent &x,
-        unsigned &total_in, unsigned &total_out, Filter *, OutputFile *,
-        unsigned hdr_len = 0);
-    virtual void unpackExtent(unsigned wanted, OutputFile *fo,
-        unsigned &total_in, unsigned &total_out,
+        Filter *, OutputFile *,
+        unsigned hdr_len = 0, unsigned b_extra = 0 ,
+        bool inhibit_compression_check = false);
+    virtual unsigned unpackExtent(unsigned wanted, OutputFile *fo,
         unsigned &c_adler, unsigned &u_adler,
-        bool first_PF_X, unsigned szb_info, bool is_rewrite = false);
+        bool first_PF_X,
+        int is_rewrite = false  // 0(false): write; 1(true): rewrite; -1: no write
+        );
+    unsigned total_in, total_out;  // unpack
 
-    int exetype;
+    int exetype;  // 0: unknown; 1: ELF; 2: pre-ELF; -1: /bin/sh; -2: Java
     unsigned blocksize;
     unsigned progid;              // program id
     unsigned overlay_offset;      // used when decompressing
@@ -89,31 +100,34 @@ protected:
     MemBuffer pt_dynamic;
     int sz_dynamic;
 
-    unsigned b_len;  // total length of b_info blocks
+    unsigned b_len;  // total length of b_info blocks  FIXME: unused
+    unsigned methods_used;  // bitmask of compression methods
+    unsigned szb_info;  // 3*4 (sizeof b_info); or 2*4 if ancient
+    unsigned saved_opt_android_shlib;
 
     // must agree with stub/linux.hh
-    __packed_struct(b_info) // 12-byte header before each compressed block
-        unsigned sz_unc;  // uncompressed_size
-        unsigned sz_cpr;  //   compressed_size
+    packed_struct(b_info) { // 12-byte header before each compressed block
+        NE32 sz_unc;  // uncompressed_size
+        NE32 sz_cpr;  //   compressed_size
         unsigned char b_method;  // compression algorithm
         unsigned char b_ftid;  // filter id
         unsigned char b_cto8;  // filter parameter
-        unsigned char b_unused;
-    __packed_struct_end()
+        unsigned char b_extra;
+    };
 
-    __packed_struct(l_info) // 12-byte trailer in header for loader
+    packed_struct(l_info) { // 12-byte trailer in header for loader
         LE32 l_checksum;
         LE32 l_magic;
         LE16 l_lsize;
         unsigned char l_version;
         unsigned char l_format;
-    __packed_struct_end()
+    };
 
-    __packed_struct(p_info) // 12-byte packed program header
-        unsigned p_progid;
-        unsigned p_filesize;
-        unsigned p_blocksize;
-    __packed_struct_end()
+    packed_struct(p_info) { // 12-byte packed program header
+        NE32 p_progid;
+        NE32 p_filesize;
+        NE32 p_blocksize;
+    };
 
     struct l_info linfo;
 
@@ -126,6 +140,7 @@ protected:
 // abstract classes encapsulating endian issues
 // note: UPX_MAGIC is always stored in le32 format
 **************************************************************************/
+
 class PackUnixBe32 : public PackUnix
 {
     typedef PackUnix super;
@@ -133,28 +148,28 @@ protected:
     PackUnixBe32(InputFile *f) : super(f) { bele = &N_BELE_RTP::be_policy; }
 
     // must agree with stub/linux.hh
-    __packed_struct(b_info) // 12-byte header before each compressed block
+    packed_struct(b_info) { // 12-byte header before each compressed block
         BE32 sz_unc;  // uncompressed_size
         BE32 sz_cpr;  //   compressed_size
         unsigned char b_method;  // compression algorithm
         unsigned char b_ftid;  // filter id
         unsigned char b_cto8;  // filter parameter
-        unsigned char b_unused;
-    __packed_struct_end()
+        unsigned char b_extra;
+    };
 
-    __packed_struct(l_info) // 12-byte trailer in header for loader
+    packed_struct(l_info) { // 12-byte trailer in header for loader
         BE32 l_checksum;
         BE32 l_magic;
         BE16 l_lsize;
         unsigned char l_version;
         unsigned char l_format;
-    __packed_struct_end()
+    };
 
-    __packed_struct(p_info) // 12-byte packed program header
+    packed_struct(p_info)  {// 12-byte packed program header
         BE32 p_progid;
         BE32 p_filesize;
         BE32 p_blocksize;
-    __packed_struct_end()
+    };
 };
 
 
@@ -165,28 +180,28 @@ protected:
     PackUnixLe32(InputFile *f) : super(f) { bele = &N_BELE_RTP::le_policy; }
 
     // must agree with stub/linux.hh
-    __packed_struct(b_info) // 12-byte header before each compressed block
+    packed_struct(b_info) { // 12-byte header before each compressed block
         LE32 sz_unc;  // uncompressed_size
         LE32 sz_cpr;  //   compressed_size
         unsigned char b_method;  // compression algorithm
         unsigned char b_ftid;  // filter id
         unsigned char b_cto8;  // filter parameter
-        unsigned char b_unused;
-    __packed_struct_end()
+        unsigned char b_extra;
+    };
 
-    __packed_struct(l_info) // 12-byte trailer in header for loader
+    packed_struct(l_info) { // 12-byte trailer in header for loader
         LE32 l_checksum;
         LE32 l_magic;
         LE16 l_lsize;
         unsigned char l_version;
         unsigned char l_format;
-    __packed_struct_end()
+    };
 
-    __packed_struct(p_info) // 12-byte packed program header
+    packed_struct(p_info) { // 12-byte packed program header
         LE32 p_progid;
         LE32 p_filesize;
         LE32 p_blocksize;
-    __packed_struct_end()
+    };
 };
 
 

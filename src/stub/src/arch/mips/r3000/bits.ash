@@ -3,7 +3,7 @@
 ;
 ;  This file is part of the UCL data compression library.
 ;
-;  Copyright (C) 1996-2020 Markus Franz Xaver Johannes Oberhumer
+;  Copyright (C) 1996-2025 Markus Franz Xaver Johannes Oberhumer
 ;  All Rights Reserved.
 ;
 ;  The UCL library is free software; you can redistribute it and/or
@@ -458,7 +458,7 @@ init_sz = . - init_sz
         .if (1 == 1)
             b       \ret
             nop
-        .else               // works on real hdw, allmost fail on sim
+        .else               // works on real hdw, almost fail on sim
             bal     t
             addiu   ra, (\ret + 4) - (. + 4)
         .endif
