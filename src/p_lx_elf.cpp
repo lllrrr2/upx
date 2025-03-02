@@ -1554,10 +1554,13 @@ PackLinuxElf32::buildLinuxLoader(
         len += snprintf(&sec[len], sizeof(sec) - len, ",%s", "EXP_TAIL");
         // End of daisy-chain fall-through.
 
-        len += snprintf(&sec[len], sizeof(sec) - len, ",%s",
-            (sec_arm_attr || is_asl)
-                ? "HUMF_A,UMF_ANDROID"
-                : "HUMF_L,UMF_LINUX");
+        // MIPS directly calls memfd_create
+        if (this->e_machine != Elf32_Ehdr::EM_MIPS) {
+            len += snprintf(&sec[len], sizeof(sec) - len, ",%s",
+                (sec_arm_attr || is_asl)
+                    ? "HUMF_A,UMF_ANDROID"
+                    : "HUMF_L,UMF_LINUX");
+        }
         if (hasLoaderSection("STRCON")) {
             len += snprintf(&sec[len], sizeof(sec) - len, ",%s", "STRCON");
         }
@@ -2312,6 +2315,8 @@ unsigned PackLinuxElf32::elf_find_table_size(unsigned dt_type, unsigned sh_type)
         x_rva = elf_unsigned_dynamic(dt_type);
     }
     Elf32_Phdr const *const x_phdr = elf_find_Phdr_for_va(x_rva, phdri, e_phnum);
+    if (!x_phdr)
+        return ~0u;  // corrupted Phdrs?
     unsigned const           d_off =             x_rva - get_te32(&x_phdr->p_vaddr);
     unsigned const           y_ndx = find_dt_ndx(d_off + get_te32(&x_phdr->p_offset));
     if (~0u != y_ndx) {
@@ -8380,6 +8385,8 @@ unsigned PackLinuxElf64::elf_find_table_size(unsigned dt_type, unsigned sh_type)
         x_rva = elf_unsigned_dynamic(dt_type);
     }
     Elf64_Phdr const *const x_phdr = elf_find_Phdr_for_va(x_rva, phdri, e_phnum);
+    if (!x_phdr)
+        return ~0u;  // corrupted Phdrs?
     unsigned const           d_off =             x_rva - get_te64(&x_phdr->p_vaddr);
     unsigned const           y_ndx = find_dt_ndx(d_off + get_te64(&x_phdr->p_offset));
     if (~0u != y_ndx) {
