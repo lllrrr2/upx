@@ -289,7 +289,8 @@ L60:
         .byte 0x3e
 .endm
         mov al, __NR_munmap  // eax was 0 from L60
-        NOTRACK; jmp [edi]  // unmap ourselves via escape hatch, then goto entry
+        // valgrind-3.24.0 has bug with NOTRACK on i386
+        /*NOTRACK;*/ jmp [edi]  // unmap ourselves via escape hatch, then goto entry
 
         section SYSCALLS
 // Sometimes linux enforces page-aligned address
