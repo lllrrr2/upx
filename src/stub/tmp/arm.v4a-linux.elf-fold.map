@@ -63,8 +63,8 @@ UMF_ANDROID     0x0000000000000000      0x540
  UMF_ANDROID    0x0000000000000000      0x540 tmp/arm.v4a-linux.elf-upxfd_android.o
                 0x00000000000002c4                upx_mmap_and_fd_android
 
-UMF_LINUX       0x0000000000000000       0xdc
- UMF_LINUX      0x0000000000000000       0xdc tmp/arm.v4a-linux.elf-upxfd_linux.o
+UMF_LINUX       0x0000000000000000      0x140
+ UMF_LINUX      0x0000000000000000      0x140 tmp/arm.v4a-linux.elf-upxfd_linux.o
                 0x0000000000000000                upx_mmap_and_fd_linux
 
 EXP_HEAD        0x0000000000000000       0xdc

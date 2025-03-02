@@ -26,8 +26,8 @@ HUMF_A          0x0000000000000000        0x4
 HUMF_L          0x0000000000000000        0x4
  HUMF_L         0x0000000000000000        0x4 tmp/powerpc-linux.elf-help_umf.o
 
-UMF_LINUX       0x0000000000000000      0x118
- UMF_LINUX      0x0000000000000000      0x118 tmp/powerpc-linux.elf-upxfd_linux.o
+UMF_LINUX       0x0000000000000000      0x178
+ UMF_LINUX      0x0000000000000000      0x178 tmp/powerpc-linux.elf-upxfd_linux.o
                 0x0000000000000000                upx_mmap_and_fd_linux
 
 .data           0x0000000000000000        0x0

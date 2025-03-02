@@ -7,8 +7,8 @@ Idx Name          Size      VMA       LMA       File off  Algn  Flags
   2 HUMF_A        04  0  0  024c  2**0  CONTENTS
   3 HUMF_L        04  0  0  0250  2**0  CONTENTS
   4 UMF_ANDROID   054c  0  0  0254  2**2  CONTENTS
-  5 UMF_LINUX     0dc  0  0  07a0  2**2  CONTENTS
-  6 ELFMAINX      0248  0  0  087c  2**2  CONTENTS
+  5 UMF_LINUX     0140  0  0  07a0  2**2  CONTENTS
+  6 ELFMAINX      0248  0  0  08e0  2**2  CONTENTS
 SYMBOL TABLE:
 00000000 l    d  ELFMAINZ 0 ELFMAINZ
 00000000 l    d  UMF_ANDROID 0 UMF_ANDROID
@@ -29,7 +29,7 @@ SYMBOL TABLE:
 00000100 g       ELFMAINZ 0 lseek
 000002cc g     F UMF_ANDROID 0280 upx_mmap_and_fd_android
 000001d0 g       ELFMAINZ 0 mmap
-00000000 g     F UMF_LINUX 0dc upx_mmap_and_fd_linux
+00000000 g     F UMF_LINUX 0140 upx_mmap_and_fd_linux
 00000164 g       ELFMAINZ 0 uname
 00000000 g       ELFMAINY 0 end_decompress
 0000018c g       ELFMAINZ 0 write
@@ -170,11 +170,15 @@ OFFSET   TYPE              VALUE
 00000048 R_ARM_PC24        UMF_LINUX
 0000004c R_ARM_PC24        UMF_LINUX
 00000068 R_ARM_PC24        open
-00000074 R_ARM_PC24        UMF_LINUX
-00000080 R_ARM_PC24        ftruncate
-0000008c R_ARM_PC24        UMF_LINUX
-000000b4 R_ARM_PC24        mmap
-000000bc R_ARM_PC24        get_page_mask
+00000070 R_ARM_PC24        UMF_LINUX
+0000007c R_ARM_PC24        UMF_LINUX
+00000080 R_ARM_PC24        UMF_LINUX
+000000d0 R_ARM_PC24        write
+000000d8 R_ARM_PC24        exit
+000000e4 R_ARM_PC24        ftruncate
+000000f0 R_ARM_PC24        UMF_LINUX
+00000118 R_ARM_PC24        mmap
+00000120 R_ARM_PC24        get_page_mask
 
 RELOCATION RECORDS FOR [ELFMAINX]:
 OFFSET   TYPE              VALUE

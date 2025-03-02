@@ -79,28 +79,21 @@ extern void my_bkpt(void const *, ...);
 #error  addr_string
 #endif  //}
 
-#ifdef __mips__  //{
-#define NO_WANT_CLOSE 1
-#define NO_WANT_EXIT 1
-#define NO_WANT_MMAP 1
-#define NO_WANT_MPROTECT 1
-#define NO_WANT_MSYNC 1
-#define NO_WANT_OPEN 1
-#define NO_WANT_READ 1
-#define NO_WANT_WRITE 1
-extern int open(char const *pathname, int flags, unsigned mode);
-#endif  //}
 #include "include/linux.h"  // syscall decls; i386 inlines via "int 0x80"
 
 #define MFD_EXEC 0x10
 //#define O_RDWR 2
 #define O_DIRECTORY 0200000  /* 0x010000 asm-generic/fcntl.h */
 #define O_TMPFILE 020000000  /* 0x400000 asm-generic/fcntl.h */
+#define EISDIR 21 /* directory mismatch */
 #define EINVAL 22 /* asm-generic/errno-base.h */
 
 extern int memfd_create(char const *, unsigned);
 extern int ftruncate(int, size_t);
+extern int open(char const *, int, int);
 extern unsigned long get_page_mask(void);
+extern ssize_t write(int, void const *, size_t);
+void exit(int) __attribute__((__noreturn__,__nothrow__));
 
 // Implementation for Linux-native, where memfd_create
 // (or /dev/shm) works.  Saves space in contrast to
@@ -121,10 +114,18 @@ unsigned long upx_mmap_and_fd_linux( // returns (mapped_addr | (1+ fd))
     if (-EINVAL == fd) { // 2024-10-15 MFD_EXEC unknown to ubuntu-20.04
         fd = memfd_create(name, 0);  // try again
     }
-    if (fd < 0) { // last chance for Linux
+    if (fd < 0) { // such as ENOSYS for memfd_create on Linux < 3.17 (2014-10-05)
+        // last chance for Linux; using /tmp often hits 'noexec' etc.
         fd = open(addr_string("/dev/shm"), O_RDWR | O_DIRECTORY | O_TMPFILE, 0700);
         if (fd < 0) {
-            return (unsigned long)(long)fd;
+            if (-EISDIR == fd) { // no memfd_create often lacks O_TMPFILE, too
+                write(2, addr_string(
+                    "UPX-5.0 wants memfd_create(), "
+                    "or needs /dev/shm(,O_TMPFILE,)\n"), 61);
+                exit(127);
+            }
+            // Error from open() is unknown. Cause later SIGSEGV.
+            return (unsigned long)(long)fd;  // -errno; high bits are all 1
         }
         // Beware: /dev/shm might limit write() to 8KiB at a time.
     }
@@ -136,7 +137,7 @@ unsigned long upx_mmap_and_fd_linux( // returns (mapped_addr | (1+ fd))
         (ptr ? MAP_FIXED : 0)|MAP_SHARED, fd, 0);
     unsigned long const page_mask = get_page_mask();
     if (page_mask <= (unsigned long)ptr) {
-        return (unsigned long)ptr;  // errno
+        return (unsigned long)ptr;  // -errno
     }
     return (unsigned long)ptr + (1+ (unsigned)fd);
 }

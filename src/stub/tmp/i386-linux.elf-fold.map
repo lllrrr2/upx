@@ -7,15 +7,16 @@ Name             Origin             Length             Attributes
 Linker script and memory map
 
 
-.text           0x0000000000000000      0x9b2
- .text          0x0000000000000000      0x190 tmp/i386-linux.elf-fold.o
+.text           0x0000000000000000      0x9b6
+ .text          0x0000000000000000      0x191 tmp/i386-linux.elf-fold.o
                 0x0000000000000008                get_page_mask
                 0x0000000000000015                get_upxfn_path
- .text          0x0000000000000190        0x0 tmp/i386-linux.elf-help_umf.o
- .text          0x0000000000000190        0x0 tmp/i386-expand.o
- .text          0x0000000000000190      0x822 tmp/i386-linux.elf-main2.o
-                0x00000000000002e8                underlay
-                0x000000000000085e                upx_main
+ *fill*         0x0000000000000191        0x3 00
+ .text          0x0000000000000194        0x0 tmp/i386-linux.elf-help_umf.o
+ .text          0x0000000000000194        0x0 tmp/i386-expand.o
+ .text          0x0000000000000194      0x822 tmp/i386-linux.elf-main2.o
+                0x00000000000002ec                underlay
+                0x0000000000000862                upx_main
 
 HUMF_A          0x0000000000000000        0x5
  HUMF_A         0x0000000000000000        0x5 tmp/i386-linux.elf-help_umf.o
@@ -27,8 +28,8 @@ UMF_ANDROID     0x0000000000000000      0x4bf
  UMF_ANDROID    0x0000000000000000      0x4bf tmp/i386-linux.elf-upxfd_android.o
                 0x0000000000000000                upx_mmap_and_fd_android
 
-UMF_LINUX       0x0000000000000000       0xaf
- UMF_LINUX      0x0000000000000000       0xaf tmp/i386-linux.elf-upxfd_linux.o
+UMF_LINUX       0x0000000000000000      0x11f
+ UMF_LINUX      0x0000000000000000      0x11f tmp/i386-linux.elf-upxfd_linux.o
                 0x0000000000000000                upx_mmap_and_fd_linux
 
 .data           0x0000000000000000        0x0
