@@ -192,13 +192,6 @@ eof_n2b:
 //        // section UMF_LINUX or UMF_ANDROID goes here
 
   section ELFMAINZ; .set noreorder
-L72:
-        li a0,2  # fd stderr
-        li v0,__NR_write; syscall
-die:
-        li a0,127
-        li v0,__NR_exit; syscall
-
 unfold:  # IN: $r_fexp,$r_auxv,$r_PMASK,$r_FOLD
         addiu sp,sp,-sp_frame
         sw $r_PMASK,F_PMASK(sp)

@@ -31,12 +31,6 @@ NBPW=  4
 #include "arch/mips/r3000/macros.ash"
 #include "arch/mips/r3000/bits.ash"
 
-#define NO_WANT_MMAP 1
-#define NO_WANT_CLOSE 1
-#define NO_WANT_EXIT 1
-#define NO_WANT_MPROTECT 1
-#define NO_WANT_WRITE 1
-
         .set mips1
         .set noreorder
         .set noat
@@ -414,6 +408,15 @@ sysret:
 sysOK:
         jr ra
           nop
+
+sysgo_incl: .globl sysgo_incl
+        syscall
+sysret_incl: .globl sysret_incl
+        .set noat
+        sltiu at,a3,1   /* 1: no error;  0: error */
+        addiu at,at,-1  /* 0: no error; -1: error */
+        or v0,v0,at     /* good result, else -1 for error */
+        .set at
 
 exit: .globl exit
         b sysgo; li v0,__NR_exit

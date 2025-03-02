@@ -127,18 +127,7 @@ struct stat { // __NR_stat = 106 + NR_SYSCALL_BASE
 #define S_IRWXU 00700
 #define AT_FDCWD -100
 #define restrict /**/
-//
-#ifdef __mips__  //{
-// We want to supersede in *.elf-fold.S, not use include/linux.h
-#define NO_WANT_CLOSE 1
-#define NO_WANT_EXIT 1
-#define NO_WANT_MMAP 1
-#define NO_WANT_MPROTECT 1
-#define NO_WANT_MSYNC 1
-#define NO_WANT_OPEN 1
-#define NO_WANT_READ 1
-#define NO_WANT_WRITE 1
-#endif  //}
+
 #include "include/linux.h"  // syscalls; i386 inlines via "int 0x80"
 extern int open(char const *, int, int);
 
