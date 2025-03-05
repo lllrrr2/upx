@@ -714,6 +714,7 @@ template <class A, class B>
 static forceinline bool testNoAliasing(A *a, B *b) noexcept {
     return TestNoAliasingStruct<A, B>::test(a, b);
 }
+
 template <class T>
 struct TestIntegerWrap { // check working -fno-strict-overflow
     static inline bool inc_gt(const T x) noexcept { return x + 1 > x; }
